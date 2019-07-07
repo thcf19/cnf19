@@ -1,0 +1,57 @@
+@import "vendor/_color-helpers.scss";
+
+// FUNCTIONS
+
+// Changes the value/brightness attribute of a color. Works on the B-value in Photoshop's HSB-colors.
+@function lighten-hsv($h, $s: 0, $v: 0, $lighten: 0) {
+  @if type_of($h) == 'color' {
+    $h: ch-color-to-hsv($h);
+  }
+  @if type_of($h) == 'list' {
+    $lighten: $s;
+    $v: nth($h, 3);
+    $s: nth($h, 2);
+    $h: nth($h, 1);
+  }
+  @return $h, $s, max(0%, min(100%, $v + $lighten));
+}
+@function saturate-hsv($h, $s: 0, $v: 0, $saturation: 0) {
+  @if type_of($h) == 'color' {
+    $h: ch-color-to-hsv($h);
+  }
+  @if type_of($h) == 'list' {
+    $saturation: $s;
+    $v: nth($h, 3);
+    $s: nth($h, 2);
+    $h: nth($h, 1);
+  }
+  @return $h, max(0%, min(100%, $s + $saturation)), $v;
+}
+
+// MIXINS
+
+@mixin button-color-helper($color) {
+  $shadow-color: ch-hsv-to-color(lighten-hsv($color, 0 - 10));
+
+  box-shadow: 0 4px $shadow-color;
+  background-color: $color;
+  &:after {
+    background: $shadow-color;
+  }
+}
+@mixin button-color($color) {
+  @include button-color-helper($color);
+
+  // Will at least give a warning when the contrast is too low
+  color: ch-best-color-contrast($color, (#fff, #000), 8);
+  &:hover {
+    @include button-color-helper(ch-hsv-to-color(lighten-hsv($color, 10)));
+  }
+}
+@mixin transition($transition) {
+  -webkit-transition: $transition;
+  -moz-transition: $transition;
+  -ms-transition: $transition;
+  -o-transition: $transition;
+  transition: $transition;
+}
